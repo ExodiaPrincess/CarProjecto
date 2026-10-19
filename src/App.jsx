@@ -94,7 +94,7 @@ export default function App() {
               <motion.section key={stage} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16, filter: "blur(6px)" }} transition={{ duration: 0.55, ease }}
                 className="wrap pt-8 md:pt-10">
                 {stage === "vehicle" && (vehicle && !notFound ? (
-                  <VehicleCard vehicle={vehicle} onConfirm={() => setStage("configure")} onBack={goHome} />
+                  <VehicleCard vehicle={vehicle} onChange={setVehicle} onConfirm={() => setStage("configure")} onBack={goHome} />
                 ) : (
                   <ManualVehicle plate={plate} onConfirm={(v) => { setVehicle(v); setNotFound(false); setFinish(v.color.finish); setStage("configure"); }} onBack={goHome} />
                 ))}

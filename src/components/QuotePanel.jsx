@@ -34,11 +34,11 @@ export default function QuotePanel({ vehicle, selection, est, setService, remove
   return (
     <div className="glass flex flex-col rounded-[24px] p-5 sm:p-6">
       <div className="flex items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <h2 className="font-display text-[22px] font-normal text-fog-50">{t.estimate}</h2>
           <p className="mt-1 flex items-center gap-2 text-[12.5px] text-fog-400"><MiniPlate plate={vehicle.plate} className="h-6 scale-90 origin-left" /><span className="truncate">{vehicle.make} {vehicle.model}</span></p>
         </div>
-        <Badge>{t.estimateBadge}</Badge>
+        <Badge className="shrink-0">{t.estimateBadge}</Badge>
       </div>
 
       <div className="mt-5 border-t border-white/[.07]">

@@ -35,6 +35,7 @@ export function tierForMake(make = "") {
 
 /* Guess a body type from the model name when the registry does not say. */
 const RULES = [
+  ["sedan", /gran(d)? ?coup[eé]|4 door coup|cla\b|arteon|stinger/i],
   ["coupe", /hurac[aá]n|aventador|revuelto|\b911\b|cayman|boxster|\br8\b|amg gt|corvette|supra|mx-5|\bz4\b|\bi8\b|a110|\btt\b|f-type|vantage|roma|portofino|296|488|f8|sf90|coup[eé]/i],
   ["estate", /\b(sw|break|touring|estate|variant|avant|sports ?tourer|wagon|kombi|carrinha|shooting brake)\b/i],
   ["suv", /qashqai|juke|captur|kadjar|austral|arkana|tucson|kona|sportage|\b(2|3|5)008\b|\bx[1-7]\b|\bq[2-8]\b|tiguan|t-roc|t-cross|kuga|puma|cx-[3-9]|rav4|c-hr|duster|ateca|arona|karoq|kodiaq|xc[469]0|model y|niro|stonic|aircross|mokka|grandland|range rover|macan|cayenne|urus|purosangue|\bsuv\b/i],

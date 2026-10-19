@@ -1,52 +1,64 @@
-# Pintura por Matrícula
+# Verniz
 
-Protótipo de um site de orçamentos de pintura automóvel. O cliente escreve a matrícula, vê o carro em 3D, toca nas peças que precisam de pintura e recebe uma estimativa de preço na hora.
+Protótipo de um site premium de orçamentos de pintura e chapa. O cliente escreve a matrícula, confirma a viatura, toca nas peças a reparar num desenho do carro em cinco vistas e recebe uma estimativa imediata. Depois pode pedir um orçamento confirmado, com fotografias dos danos.
 
-## Como abrir
+Feito com React, Tailwind CSS, Framer Motion, ícones Lucide e three.js. Depois da pesquisa, a viatura aparece num modelo 3D que se pode rodar e onde se tocam as peças; há também cinco vistas desenhadas em SVG, com cada peça como zona clicável independente.
 
-É uma página única, sem build: abra `index.html` no navegador. Para a pôr online, ative o **GitHub Pages** no repositório (Settings → Pages → branch `main`, pasta `/`).
+## Abrir
 
-O 3D usa three.js r128, carregado do cdnjs/jsDelivr, por isso a página precisa de internet.
+Abra `index.html` no navegador (precisa de internet para carregar React, three.js, Framer Motion e as fontes). No Vercel, o site abre logo no endereço principal.
 
-## O que funciona
+Um link com a matrícula no fim (por exemplo `…/#73-SX-98`) abre logo esse carro.
 
-- **Página inicial** com um campo grande para a matrícula; ao carregar em *Ver o meu carro* abre logo o carro em 3D. Um link com a matrícula no fim (por exemplo `…/#73-SX-98`) abre esse carro diretamente.
-- **Matrícula → marca e modelo.** Por agora só com as matrículas de demonstração (`73-SX-98`, `AB-12-CD`, `45-RT-21`, `AE-77-ZX`, `90-QL-08`, `AL-22-HN`). Para outras matrículas, o cliente escolhe o tipo de carroçaria à mão.
-- **Carro 3D** com o tipo de carroçaria certo (hatchback, berlina, SUV, desportivo), pintado na cor original. Desportivos (Lamborghini, Ferrari, Porsche 911, etc.) mostram um coupé de 2 portas.
-- **Peças clicáveis:** para-choques, capô, tejadilho, guarda-lamas, cada porta, painéis laterais traseiros, mala ou porta da bagageira, espelhos.
-- **Orçamento em direto:** trabalho por peça (só pintura / riscos / amolgadela), tipo de tinta (sólida, metalizada, pérola), ajuste pelo tamanho do carro, por marca premium (×1,12) e por marca de luxo (×1,40), desconto a partir de 4 peças, intervalo de ±12% e botão para copiar o resumo.
+Matrículas de demonstração (não gastam créditos): `73-SX-98`, `AB-12-CD`, `45-RT-21`, `AE-77-ZX`, `BT-05-EV`, `AL-22-HN`. Qualquer outra é pesquisada no RegCheck quando estiver ligado (ver abaixo); se não houver dados, abre o formulário para indicar a viatura à mão.
 
-## Onde mexer
+## Alterar e voltar a gerar
+
+```bash
+npm install
+npm run build:site   # gera de novo index.html
+```
 
 | Quero mudar… | Onde |
 |---|---|
-| Preços | Objeto `PRICES` no topo do script em `index.html` |
-| Matrículas de demonstração | Objeto `DEMO` |
-| Pesquisa real de matrículas | Função `lookupPlate()` (ver abaixo) |
-| Que modelo 3D cada carroçaria usa | `MODEL_FOR` |
-| Que modelos contam como desportivos | `BODY_RULES` (primeira linha) |
+| Preços, multiplicadores, desconto | `src/data/pricing.js` |
+| Matrículas de demonstração | `src/data/vehicles.js` |
+| Textos (PT / EN) | `src/i18n.jsx` |
+| Forma dos carros e das peças | `src/car/geometry.js` |
+| Cores e tipos de letra | `tailwind.config.cjs`, `src/styles.css` |
+| Pesquisa no RegCheck | `api/plate.js`, `src/services/vehicleLookup.js` |
+| Fotografias do topo | `assets/hero/` e `src/data/heroPhotos.js` |
+| Modelo 3D de cada carroçaria | `MODEL_FOR` em `src/car/Car3D.jsx` |
 
-### Ligar a pesquisa real de matrículas
+## Fotografias e modelos 3D
 
-Substitua `lookupPlate()` por uma chamada ao **seu próprio backend** (por exemplo `fetch('/api/plate?p=' + plate)`). Esse backend chama a API paga (RegCheck, openapi.com…) com a sua chave e guarda cada resultado, para pagar só uma vez por matrícula. **Nunca ponha a chave da API nesta página**, porque qualquer pessoa a conseguiria copiar.
+- As fotografias do topo são do Unsplash (licença Unsplash, uso comercial permitido): Hyundai Motor Group, Puscas Adryan e Petko Boiadjiev. Duas mostram o logótipo da Hyundai.
+- Os carros 3D são de Quaternius (CC0), os mesmos da raiz do repositório (`assets/models/cars.json`). São formas genéricas por tipo de carroçaria, não o modelo exato. A carrinha usa por agora o SUV.
+- `index.html` carrega as fotografias da pasta `assets/hero/`, por isso as duas têm de estar juntas.
 
-## Modelos 3D
+## Ligar a pesquisa real de matrículas (RegCheck)
 
-Os carros são de **Quaternius** ([quaternius.itch.io/lowpoly-cars](https://quaternius.itch.io/lowpoly-cars)), licença **CC0** (domínio público, uso comercial permitido). Os originais estão em `models/source/`.
+A pasta `api/` tem duas funções que o Vercel publica sozinho:
 
-`models/prep.py` corta cada carro em peças de pintura, gera `models/cars.json` e atualiza a cópia embutida em `index.html`:
+- `api/plate.js` pergunta ao RegCheck (`CheckPortugal`) a marca, o modelo, o ano, o combustível e a imagem do modelo.
+- `api/car-image.js` passa a imagem do RegCheck pelo próprio site, porque o RegCheck a serve em `http` e um site `https` não a pode mostrar diretamente.
 
-```bash
-cd models
-python3 prep.py
-```
+Para ligar:
 
-Para adicionar outro carro, coloque o `.obj` e o `.mtl` em `models/source/`, acrescente uma entrada em `CARS` dentro de `prep.py` (ficheiro, material da pintura, tipo de traseira), corra o script e aponte o tipo de carroçaria para ele em `MODEL_FOR`.
+1. Crie conta em [regcheck.org.uk](https://www.regcheck.org.uk) (ou [matricula.co.pt](https://www.matricula.co.pt)). O nome de utilizador é a "chave".
+2. No Vercel: **Settings → Environment Variables**, nome `REGCHECK_USERNAME`, valor o seu nome de utilizador, para *Production* (e *Preview* se quiser).
+3. **Deployments → Redeploy** para a variável entrar em vigor.
 
-Ainda não há modelo de carrinha nem de comercial ligeiro; esses tipos mostram o SUV por agora.
+O nome de utilizador fica só no servidor; nunca chega ao navegador. Cada matrícula encontrada gasta um crédito; as respostas ficam guardadas na cache do Vercel durante um ano, por isso pesquisar a mesma matrícula outra vez normalmente não volta a gastar. Sem a variável, ou sem créditos, o site abre o formulário manual.
 
-## Verniz (nova versão)
+O registo português não indica a cor nem o tipo de carroçaria. O site adivinha a carroçaria pelo nome do modelo e pede ao cliente que confirme as duas coisas no passo *Viatura*. A imagem do RegCheck é uma imagem de referência do modelo, não do carro do cliente.
 
-No Vercel, a página inicial redireciona para `/verniz/` (ver `vercel.json`). A versão antiga continua em `/index.html`.
+## Ainda por fazer
 
-A pasta [`verniz/`](verniz/) tem a versão premium do site: tema escuro, desenho do carro em SVG com cinco vistas, estimativa em direto e pedido de orçamento com fotografias. Ver [`verniz/README.md`](verniz/README.md).
+- Pôr a variável `REGCHECK_USERNAME` no Vercel e comprar créditos.
+- Envio real do pedido de orçamento: o formulário valida tudo mas não envia nada.
+- Os preços são exemplos e aparecem sempre como estimativa.
+
+## Versão antiga
+
+A primeira versão (carro 3D com fundo claro) está em [`classic/`](classic/).

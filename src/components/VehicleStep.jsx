@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, BadgeCheck, CalendarDays, Car, Droplet, Fuel, Rotate3d, SearchX } from "lucide-react";
+import { ArrowLeft, ArrowRight, BadgeCheck, CalendarDays, Car, Droplet, Fuel, Image as ImageIcon, Rotate3d, SearchX } from "lucide-react";
 import { useI18n } from "../i18n.jsx";
 import CarSVG from "../car/CarSVG.jsx";
 import Car3D, { has3D } from "../car/Car3D.jsx";
@@ -14,19 +14,22 @@ const item = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transiti
 function Stage({ vehicle }) {
   const { t } = useI18n();
   const three = has3D();
+  const [photoOk, setPhotoOk] = useState(!!vehicle.imageUrl);
+  const [show3d, setShow3d] = useState(false);
+  useEffect(() => { setPhotoOk(!!vehicle.imageUrl); setShow3d(false); }, [vehicle.imageUrl]);
+  const photo = photoOk && !show3d;
   return (
     <div className="relative overflow-hidden rounded-[22px] border border-white/[.06] bg-[radial-gradient(80%_70%_at_50%_70%,rgba(143,227,240,.10),transparent_70%),linear-gradient(180deg,#0E1318,#07090C)]">
       <div className="floor-grid pointer-events-none absolute inset-x-0 bottom-0 h-1/2 opacity-70 [transform:perspective(500px)_rotateX(60deg)] [transform-origin:bottom]" />
-      {three ? (
-        <motion.div initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1, ease }} className="relative aspect-[4/3] w-full sm:aspect-[16/10]">
+      {photo ? (
+        <motion.div key="photo" initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, ease }} className="relative grid aspect-[4/3] w-full place-items-center p-4 sm:aspect-[16/10] sm:p-8">
+          <img src={vehicle.imageUrl} alt={`${vehicle.make} ${vehicle.model}`} onError={() => setPhotoOk(false)}
+            className="max-h-full max-w-full rounded-xl object-contain shadow-[0_30px_60px_-20px_rgba(0,0,0,.8)]" />
+        </motion.div>
+      ) : three ? (
+        <motion.div key="3d" initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1, ease }} className="relative aspect-[4/3] w-full sm:aspect-[16/10]">
           <Car3D type={vehicle.bodyType} color={vehicle.color.hex} label={`${vehicle.make} ${vehicle.model}, 3D`} />
         </motion.div>
-      ) : null}
-      {three ? (
-        <div className="pointer-events-none relative flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 pb-3.5 text-[12px] text-fog-400 sm:absolute sm:inset-x-4 sm:bottom-3 sm:p-0">
-          <span className="flex items-center gap-2"><Rotate3d className="h-4 w-4 text-pearl-400" aria-hidden="true" />{t.drag3d}</span>
-          <span>{t.model3d(t.bodyTypes[vehicle.bodyType])}</span>
-        </div>
       ) : (
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.div key={vehicle.bodyType + vehicle.color.hex} initial={{ opacity: 0, x: 60, filter: "blur(8px)" }} animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
@@ -35,7 +38,48 @@ function Stage({ vehicle }) {
           </motion.div>
         </AnimatePresence>
       )}
+      {(photo || three) && (
+        <div className="relative flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 pb-3.5 text-[12px] text-fog-400 sm:absolute sm:inset-x-4 sm:bottom-3 sm:p-0">
+          {photo
+            ? <span className="flex items-center gap-2"><ImageIcon className="h-4 w-4 text-pearl-400" aria-hidden="true" />{t.modelPhoto}</span>
+            : <span className="pointer-events-none flex items-center gap-2"><Rotate3d className="h-4 w-4 text-pearl-400" aria-hidden="true" />{t.drag3d}</span>}
+          {photoOk && three ? (
+            <button type="button" onClick={() => setShow3d((v) => !v)} className="rounded-full border border-white/10 bg-ink-950/60 px-3 py-1 text-fog-200 backdrop-blur transition-colors hover:border-pearl-400/50 hover:text-pearl-200">
+              {show3d ? t.seePhoto : t.see3d}
+            </button>
+          ) : <span className="pointer-events-none">{t.model3d(t.bodyTypes[vehicle.bodyType])}</span>}
+        </div>
+      )}
     </div>
+  );
+}
+
+/* RegCheck's Portugal data has no colour or body style: let the customer set them. */
+function Adjust({ vehicle, onChange }) {
+  const { t, lang } = useI18n();
+  return (
+    <motion.div variants={item} className="mt-8 rounded-2xl border border-white/[.08] bg-white/[.02] p-4">
+      <p className="text-[13.5px] font-medium text-fog-100">{t.adjustTitle}</p>
+      <p className="mt-1 text-[12.5px] leading-relaxed text-fog-400">{t.adjustLede}</p>
+      <p className="mt-4 text-[11.5px] uppercase tracking-[.14em] text-fog-500">{t.body}</p>
+      <div className="mt-2 flex flex-wrap gap-1.5" role="radiogroup" aria-label={t.body}>
+        {BODY_TYPE_LIST.map((b) => (
+          <button key={b} type="button" role="radio" aria-checked={vehicle.bodyType === b} onClick={() => onChange((v) => ({ ...v, bodyType: b }))}
+            className={cx("rounded-full border px-3 py-1.5 text-[12.5px] transition-colors", vehicle.bodyType === b ? "border-pearl-400/50 bg-pearl-400/[.12] text-pearl-200" : "border-white/10 text-fog-300 hover:border-white/25 hover:text-fog-50")}>
+            {t.bodyTypes[b]}
+          </button>
+        ))}
+      </div>
+      <p className="mt-4 text-[11.5px] uppercase tracking-[.14em] text-fog-500">{t.color}</p>
+      <div className="mt-2 flex flex-wrap gap-2.5">
+        {PAINT_SWATCHES.map((s) => (
+          <button key={s.hex} type="button" onClick={() => onChange((v) => ({ ...v, color: { ...v.color, hex: s.hex, name: s.name }, colorUnknown: false, colorPicked: true }))}
+            aria-label={s.name[lang]} aria-pressed={vehicle.color.hex === s.hex && !vehicle.colorUnknown} title={s.name[lang]}
+            className={cx("h-8 w-8 rounded-full ring-offset-2 ring-offset-ink-900 transition", vehicle.color.hex === s.hex && !vehicle.colorUnknown ? "ring-2 ring-pearl-400" : "ring-1 ring-white/20 hover:ring-white/50")}
+            style={{ background: `radial-gradient(circle at 32% 30%, #ffffff70, transparent 45%), ${s.hex}` }} />
+        ))}
+      </div>
+    </motion.div>
   );
 }
 
@@ -48,7 +92,7 @@ function Spec({ icon: Icon, label, children }) {
   );
 }
 
-export function VehicleCard({ vehicle, onConfirm, onBack }) {
+export function VehicleCard({ vehicle, onConfirm, onBack, onChange }) {
   const { t, lang } = useI18n();
   return (
     <motion.div variants={stagger} initial="hidden" animate="show" className="glass grid gap-8 rounded-[28px] p-4 sm:p-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-10 lg:p-8">
@@ -72,6 +116,7 @@ export function VehicleCard({ vehicle, onConfirm, onBack }) {
           </Spec>
           <Spec icon={Fuel} label={lang === "pt" ? "Combustível" : "Fuel"}>{vehicle.fuel ? t.fuels[vehicle.fuel] : "—"}</Spec>
         </dl>
+        {vehicle.source === "api" && onChange && (vehicle.colorUnknown || vehicle.colorPicked) && <Adjust vehicle={vehicle} onChange={onChange} />}
         <motion.div variants={item} className="mt-auto pt-10">
           <p className="text-[14px] text-fog-300">{t.isThisYours}</p>
           <div className="mt-4 flex flex-wrap gap-3">

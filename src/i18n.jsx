@@ -18,6 +18,8 @@ const STR = {
     photoBy: "Fotografia", photoN: (n) => `Fotografia ${n}`,
     drag3d: "Arraste para rodar", drag3dTap: "Arraste para rodar · toque numa peça",
     model3d: (b) => `Modelo 3D genérico · ${b}`,
+    modelPhoto: "Imagem de referência do modelo", see3d: "Ver em 3D", seePhoto: "Ver imagem",
+    adjustTitle: "Confirme os detalhes", adjustLede: "O registo não indica a cor nem o tipo de carroçaria. Ajuste se for preciso: muda o preço e o modelo 3D.",
     howTitle: "Do registo ao orçamento em quatro passos",
     how: [
       ["Matrícula", "Identificamos marca, modelo, ano e cor original a partir do registo."],
@@ -97,6 +99,8 @@ const STR = {
     photoBy: "Photo", photoN: (n) => `Photo ${n}`,
     drag3d: "Drag to turn", drag3dTap: "Drag to turn · tap a panel",
     model3d: (b) => `Generic 3D model · ${b}`,
+    modelPhoto: "Reference image of the model", see3d: "See in 3D", seePhoto: "See image",
+    adjustTitle: "Check the details", adjustLede: "The registry does not record colour or body style. Adjust if needed: it changes the price and the 3D model.",
     howTitle: "From registration to estimate in four steps",
     how: [
       ["Registration", "We identify make, model, year and original colour from the registry."],
