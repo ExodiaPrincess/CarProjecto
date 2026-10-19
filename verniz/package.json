@@ -1,0 +1,19 @@
+{
+  "name": "verniz",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Verniz: orçamento de pintura e chapa automóvel a partir da matrícula.",
+  "scripts": {
+    "build": "node build.mjs src/main.jsx dist/verniz && cp dist/verniz-standalone.html index.html"
+  },
+  "dependencies": {
+    "framer-motion": "11.11.17",
+    "lucide-react": "0.460.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.0",
+    "tailwindcss": "3.4.17"
+  }
+}

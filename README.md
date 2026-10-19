@@ -44,3 +44,7 @@ python3 prep.py
 Para adicionar outro carro, coloque o `.obj` e o `.mtl` em `models/source/`, acrescente uma entrada em `CARS` dentro de `prep.py` (ficheiro, material da pintura, tipo de traseira), corra o script e aponte o tipo de carroçaria para ele em `MODEL_FOR`.
 
 Ainda não há modelo de carrinha nem de comercial ligeiro; esses tipos mostram o SUV por agora.
+
+## Verniz (nova versão)
+
+A pasta [`verniz/`](verniz/) tem a versão premium do site: tema escuro, desenho do carro em SVG com cinco vistas, estimativa em direto e pedido de orçamento com fotografias. Ver [`verniz/README.md`](verniz/README.md).
