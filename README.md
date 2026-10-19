@@ -10,6 +10,7 @@ O 3D usa three.js r128, carregado do cdnjs/jsDelivr, por isso a página precisa 
 
 ## O que funciona
 
+- **Página inicial** com um campo grande para a matrícula; ao carregar em *Ver o meu carro* abre logo o carro em 3D. Um link com a matrícula no fim (por exemplo `…/#73-SX-98`) abre esse carro diretamente.
 - **Matrícula → marca e modelo.** Por agora só com as matrículas de demonstração (`73-SX-98`, `AB-12-CD`, `45-RT-21`, `AE-77-ZX`, `90-QL-08`, `AL-22-HN`). Para outras matrículas, o cliente escolhe o tipo de carroçaria à mão.
 - **Carro 3D** com o tipo de carroçaria certo (hatchback, berlina, SUV, desportivo), pintado na cor original. Desportivos (Lamborghini, Ferrari, Porsche 911, etc.) mostram um coupé de 2 portas.
 - **Peças clicáveis:** para-choques, capô, tejadilho, guarda-lamas, cada porta, painéis laterais traseiros, mala ou porta da bagageira, espelhos.
