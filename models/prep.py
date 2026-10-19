@@ -12,6 +12,7 @@ CARS = {
     "hatch": dict(file="NormalCar2", paint="LightBlue", trim=["Material.007", "Black", "Grey"], rear="tailgate"),
     "sedan": dict(file="NormalCar1", paint="Blue", trim=["Black", "Grey"], rear="trunk"),
     "suv":   dict(file="SUV", paint="White", trim=["Black", "Grey"], rear="tailgate"),
+    "sports": dict(file="SportsCar2", paint="White", trim=["Grey"], rear="trunk", doors=2),
 }
 Q = 4000.0  # quantisation: 1 unit = 0.25 mm
 
@@ -101,7 +102,8 @@ def build(key, cfg):
         return best
     xFD = snap(min(Xf - r - 0.05, wsBase))
     xRD = snap(Xr + r + 0.05)
-    xMid = snap((xFD + xRD) / 2 + 0.08)
+    # four doors: B-pillar near the middle; two doors: one long door, short rear quarter
+    xMid = snap(xRD + (xFD - xRD) * 0.30, 0.3) if cfg.get("doors", 4) == 2 else snap((xFD + xRD) / 2 + 0.08)
     print("   door lines", round(xFD, 3), round(xMid, 3), round(xRD, 3))
     xFrontCorner = Xf + r + 0.06            # ahead of this, the side belongs to the front bumper
     xRearCorner = Xr - r - 0.06
@@ -109,8 +111,10 @@ def build(key, cfg):
     tlBot = tlo[1]
     roofY = bhi[1]
 
+    two_door = cfg.get("doors", 4) == 2
     def side_panel(X, s):
         if X >= xFD: return "fender" + s
+        if two_door: return ("doorF" if X >= xMid else "quarter") + s
         if X >= xMid: return "doorF" + s
         if X >= xRD: return "doorR" + s
         return "quarter" + s
@@ -149,12 +153,18 @@ def build(key, cfg):
         if n[1] > 0.6 and X < xRD: return cfg["rear"] if X < rgBase else "quarter" + s
         return side_panel(X, s)
 
+    def is_mirror(P):
+        X, Y, Z = (sum(p[k] for p in P) / len(P) for k in range(3))
+        return wsBase - 0.45 < X < wsBase + 0.15 and belt - 0.08 < Y < belt + 0.25 and abs(Z) > glassHW + 0.05 and abs(Z) > hw - 0.25
+
     groups = collections.defaultdict(list)      # id -> flat triangle list
     face_id = []
     for (o, m, idx) in faces:
         P = [V[i] for i in idx]
         if "Wheel" in o:
             gid = "w:" + m
+        elif m != paint and m in cfg["trim"] and is_mirror(P):
+            gid = "mirror" + ("R" if sum(p[2] for p in P) > 0 else "L")   # unpainted mirror caps get painted
         elif m == paint:
             c = tuple(sum(p[k] for p in P) / len(P) for k in range(3))
             gid = classify(c, poly_normal(P))
@@ -182,6 +192,7 @@ def build(key, cfg):
 
     out = {
         "rear": cfg["rear"],
+        "doors": cfg.get("doors", 4),
         "dims": dict(L=round(2 * half, 3), W=round(2 * hw, 3), roofY=round(roofY, 3), r=round(r, 3),
                      xf=round(Xf, 3), xr=round(Xr, 3), belt=round(belt, 3)),
         "groups": {k: pack(v) for k, v in sorted(groups.items())},

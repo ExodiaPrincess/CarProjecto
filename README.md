@@ -10,10 +10,10 @@ O 3D usa three.js r128, carregado do cdnjs/jsDelivr, por isso a página precisa 
 
 ## O que funciona
 
-- **Matrícula → marca e modelo.** Por agora só com as matrículas de demonstração (`73-SX-98`, `AB-12-CD`, `45-RT-21`, `AE-77-ZX`, `90-QL-08`). Para outras matrículas, o cliente escolhe o tipo de carroçaria à mão.
-- **Carro 3D** com o tipo de carroçaria certo (hatchback, berlina, SUV), pintado na cor original.
+- **Matrícula → marca e modelo.** Por agora só com as matrículas de demonstração (`73-SX-98`, `AB-12-CD`, `45-RT-21`, `AE-77-ZX`, `90-QL-08`, `AL-22-HN`). Para outras matrículas, o cliente escolhe o tipo de carroçaria à mão.
+- **Carro 3D** com o tipo de carroçaria certo (hatchback, berlina, SUV, desportivo), pintado na cor original. Desportivos (Lamborghini, Ferrari, Porsche 911, etc.) mostram um coupé de 2 portas.
 - **Peças clicáveis:** para-choques, capô, tejadilho, guarda-lamas, cada porta, painéis laterais traseiros, mala ou porta da bagageira, espelhos.
-- **Orçamento em direto:** trabalho por peça (só pintura / riscos / amolgadela), tipo de tinta (sólida, metalizada, pérola), ajuste pelo tamanho do carro e por marca premium, desconto a partir de 4 peças, intervalo de ±12% e botão para copiar o resumo.
+- **Orçamento em direto:** trabalho por peça (só pintura / riscos / amolgadela), tipo de tinta (sólida, metalizada, pérola), ajuste pelo tamanho do carro, por marca premium (×1,12) e por marca de luxo (×1,40), desconto a partir de 4 peças, intervalo de ±12% e botão para copiar o resumo.
 
 ## Onde mexer
 
@@ -23,6 +23,7 @@ O 3D usa three.js r128, carregado do cdnjs/jsDelivr, por isso a página precisa 
 | Matrículas de demonstração | Objeto `DEMO` |
 | Pesquisa real de matrículas | Função `lookupPlate()` (ver abaixo) |
 | Que modelo 3D cada carroçaria usa | `MODEL_FOR` |
+| Que modelos contam como desportivos | `BODY_RULES` (primeira linha) |
 
 ### Ligar a pesquisa real de matrículas
 
