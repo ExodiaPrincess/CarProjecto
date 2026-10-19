@@ -47,4 +47,6 @@ Ainda não há modelo de carrinha nem de comercial ligeiro; esses tipos mostram 
 
 ## Verniz (nova versão)
 
+No Vercel, a página inicial redireciona para `/verniz/` (ver `vercel.json`). A versão antiga continua em `/index.html`.
+
 A pasta [`verniz/`](verniz/) tem a versão premium do site: tema escuro, desenho do carro em SVG com cinco vistas, estimativa em direto e pedido de orçamento com fotografias. Ver [`verniz/README.md`](verniz/README.md).
