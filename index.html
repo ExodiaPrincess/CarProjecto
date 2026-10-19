@@ -1010,12 +1010,14 @@ function applyVehicle(v, opts = {}) {
 function renderVehicle() {
   const v = state.vehicle; if (!v) return;
   const name = `${v.make} ${v.model}`.trim();
-  $("#vehName").textContent = name || "Viatura";
+  $("#vehName").textContent = name || (v.source === "unknown" ? "Matrícula sem dados" : "Viatura");
   $("#vehPlate").textContent = `${v.plate} · ${BODY_LABEL[state.bodyType]}`;
   $("#vMakeModel").textContent = name || "—";
   $("#vColor").textContent = v.color || "—";
   $("#vSwatch").style.background = COLORS[v.color] || "transparent";
-  $("#vSrc").textContent = v.source === "manual"
+  $("#vSrc").textContent = v.source === "unknown"
+    ? "Esta matrícula não está nos dados de demonstração. Escolha o tipo de carroçaria no quadro acima."
+    : v.source === "manual"
     ? "Indicado por si. Na versão final vem da pesquisa pela matrícula."
     : `Dados de demonstração${v.year ? ` · matrícula de ${v.year}` : ""}. Carroçaria deduzida do modelo; pode corrigir acima.`;
   if (MODEL_STANDIN[state.bodyType] && hasModel(state.bodyType))
@@ -1211,6 +1213,10 @@ async function doLookup(p) {
   else {
     $("#manualPlate").textContent = p;
     $("#mMake").value = ""; $("#mModel").value = "";
+    // don't leave the previous car's name next to the new plate
+    state.vehicle = { make: "", model: "", color: "", plate: p, bodyType: state.bodyType, source: "unknown" };
+    renderVehicle();
+    document.querySelectorAll("#demo button").forEach((b) => b.setAttribute("aria-current", "false"));
     $("#manual").hidden = false;
     $("#manual").scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
   }
