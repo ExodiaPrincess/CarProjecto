@@ -1,24 +1,27 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
-import { ChevronLeft, ChevronRight, MousePointerClick, Check, Plus, RotateCcw } from "lucide-react";
+import { ChevronLeft, ChevronRight, MousePointerClick, Check, Plus, RotateCcw, Rotate3d } from "lucide-react";
 import CarSVG from "./CarSVG.jsx";
+import Car3D, { has3D } from "./Car3D.jsx";
 import { panelsFor, bodyMeta, bestViewFor } from "./panels.js";
 import { useI18n, panelName } from "../i18n.jsx";
 import { eur, cx } from "../lib/util.js";
 import { ease } from "../components/ui.jsx";
 
-export const VIEW_ORDER = ["front", "left", "rear", "right", "top"];
+const ALL_VIEWS = ["3d", "front", "left", "rear", "right", "top"];
+export const viewOrder = () => (has3D() ? ALL_VIEWS : ALL_VIEWS.slice(1));
+export const defaultView = () => viewOrder()[0];
 
-function ViewTabs({ view, setView }) {
+function ViewTabs({ view, setView, order }) {
   const { t } = useI18n();
   return (
     <LayoutGroup id="views">
       <div role="tablist" aria-label="Vistas" className="inline-flex max-w-full overflow-x-auto rounded-full border border-white/10 bg-ink-950/60 p-1 backdrop-blur">
-        {VIEW_ORDER.map((v) => (
+        {order.map((v) => (
           <button key={v} role="tab" aria-selected={view === v} onClick={() => setView(v)}
             className={cx("relative h-9 shrink-0 rounded-full px-3.5 text-[13px] transition-colors sm:px-4", view === v ? "text-ink-950" : "text-fog-300 hover:text-fog-50")}>
             {view === v && <motion.span layoutId="view-pill" className="absolute inset-0 rounded-full bg-fog-50" transition={{ type: "spring", stiffness: 380, damping: 32 }} />}
-            <span className="relative">{t.views[v]}</span>
+            <span className="relative flex items-center gap-1.5">{v === "3d" && <Rotate3d className="h-3.5 w-3.5" aria-hidden="true" />}{t.views[v]}</span>
           </button>
         ))}
       </div>
@@ -36,6 +39,9 @@ export default function CarDiagram({ vehicle, selection, onToggle, priceOf, view
   const dirRef = useRef(1);
   const swipe = useRef(null);
   const panels = useMemo(() => panelsFor(vehicle.bodyType), [vehicle.bodyType]);
+  const VIEW_ORDER = useMemo(viewOrder, []);
+  const [focus, setFocus] = useState(null);
+  const is3d = view === "3d";
 
   const go = (v) => {
     const a = VIEW_ORDER.indexOf(view), b = VIEW_ORDER.indexOf(v);
@@ -74,30 +80,39 @@ export default function CarDiagram({ vehicle, selection, onToggle, priceOf, view
   return (
     <div className="flex min-w-0 flex-col">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <ViewTabs view={view} setView={go} />
+        <ViewTabs view={view} setView={go} order={VIEW_ORDER} />
         <p className="hidden items-center gap-2 text-[12.5px] text-fog-400 md:flex"><MousePointerClick className="h-4 w-4 text-pearl-400" aria-hidden="true" />{t.chooseLede}</p>
       </div>
 
       <div ref={stageRef} className="relative mt-4 overflow-hidden rounded-[24px] border border-white/[.06] bg-[radial-gradient(70%_60%_at_50%_62%,rgba(143,227,240,.09),transparent_70%),linear-gradient(180deg,#0D1217,#06080B)]"
         onKeyDown={(e) => { if (e.target === e.currentTarget) { if (e.key === "ArrowRight") step(1); if (e.key === "ArrowLeft") step(-1); } }}
-        onTouchStart={(e) => { const p = e.touches[0]; swipe.current = { x: p.clientX, y: p.clientY }; }}
+        onTouchStart={(e) => { if (is3d) return; const p = e.touches[0]; swipe.current = { x: p.clientX, y: p.clientY }; }}
         onTouchEnd={(e) => { const s0 = swipe.current, p = e.changedTouches[0]; swipe.current = null; if (!s0) return; const dx = p.clientX - s0.x, dy = p.clientY - s0.y; if (Math.abs(dx) > 60 && Math.abs(dy) < 45) step(dx < 0 ? 1 : -1); }}>
         <div className="floor-grid pointer-events-none absolute inset-x-0 bottom-0 h-1/2 opacity-60 [transform:perspective(520px)_rotateX(60deg)] [transform-origin:bottom]" />
-        <div className="relative grid aspect-[1000/520] w-full place-items-center px-3 sm:px-8">
+        <div className={cx("relative grid w-full place-items-center px-3 sm:px-8", is3d ? "aspect-[4/3] sm:aspect-[1000/520]" : "aspect-[1000/520]")}>
           <AnimatePresence mode="popLayout" initial={false} custom={dir}>
+            {is3d ? (
+              <motion.div key="3d" custom={dir} variants={variants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.6, ease }} className="absolute inset-0">
+                <Car3D type={vehicle.bodyType} color={vehicle.color.hex} selection={selection} hover={hover} interactive focusId={focus}
+                  onToggle={toggle} onEnter={onEnter} onMove={onMove} onLeave={onLeave} label={`${vehicle.make} ${vehicle.model}, 3D`} />
+              </motion.div>
+            ) : (
             <motion.div key={view} custom={dir} variants={variants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.6, ease }}
               className={cx("col-start-1 row-start-1 w-full", view === "front" || view === "rear" ? "max-w-[76%] sm:max-w-[70%]" : "max-w-full")}>
               <CarSVG type={vehicle.bodyType} view={view} color={vehicle.color.hex} plate={vehicle.plate} interactive
                 stateOf={stateOf} onEnter={onEnter} onMove={onMove} onLeave={onLeave} onToggle={toggle} labelOf={name}
                 className="w-full overflow-visible" title={`${vehicle.make} ${vehicle.model}, ${t.views[view]}`} />
             </motion.div>
+            )}
           </AnimatePresence>
         </div>
 
         <button onClick={() => step(-1)} aria-label="Vista anterior" className="absolute left-3 top-1/2 hidden sm:grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/10 bg-ink-950/60 text-fog-200 backdrop-blur transition hover:border-white/25 hover:text-fog-50"><ChevronLeft className="h-5 w-5" /></button>
         <button onClick={() => step(1)} aria-label="Vista seguinte" className="absolute right-3 top-1/2 hidden sm:grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/10 bg-ink-950/60 text-fog-200 backdrop-blur transition hover:border-white/25 hover:text-fog-50"><ChevronRight className="h-5 w-5" /></button>
 
-        <div className="pointer-events-none absolute bottom-3 left-4 font-wide text-[10px] uppercase tracking-[.3em] text-fog-500">{t.views[view]}</div>
+        {is3d
+          ? <div className="pointer-events-none absolute bottom-3 left-4 flex items-center gap-2 text-[12px] text-fog-400"><Rotate3d className="h-4 w-4 text-pearl-400" aria-hidden="true" />{t.drag3dTap}</div>
+          : <div className="pointer-events-none absolute bottom-3 left-4 font-wide text-[10px] uppercase tracking-[.3em] text-fog-500">{t.views[view]}</div>}
         <div className="pointer-events-none absolute bottom-3 right-4 text-[12px] text-fog-400 tnum">{t.panelsCount(selection.size)}</div>
 
         <AnimatePresence>
@@ -134,7 +149,7 @@ export default function CarDiagram({ vehicle, selection, onToggle, priceOf, view
                   const on = selection.has(p.id);
                   return (
                     <motion.button key={p.id} type="button" whileTap={{ scale: 0.95 }} aria-pressed={on}
-                      onClick={() => { onToggle(p.id); if (!on) go(bestViewFor(p.id)); }}
+                      onClick={() => { onToggle(p.id); if (!on) { if (is3d) setFocus({ id: p.id }); else go(bestViewFor(p.id)); } }}
                       onMouseEnter={() => setHover(p.id)} onMouseLeave={() => setHover(null)}
                       className={cx("flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12.5px] transition-colors",
                         on ? "border-pearl-400/50 bg-pearl-400/[.12] text-pearl-200" : "border-white/10 text-fog-300 hover:border-white/25 hover:text-fog-50")}>

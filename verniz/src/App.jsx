@@ -10,7 +10,7 @@ import Nav from "./components/Nav.jsx";
 import Landing from "./components/Landing.jsx";
 import Stepper from "./components/Stepper.jsx";
 import { VehicleCard, ManualVehicle } from "./components/VehicleStep.jsx";
-import CarDiagram from "./car/CarDiagram.jsx";
+import CarDiagram, { defaultView } from "./car/CarDiagram.jsx";
 import QuotePanel from "./components/QuotePanel.jsx";
 import RequestStep from "./components/RequestStep.jsx";
 import Confirmation from "./components/Confirmation.jsx";
@@ -29,7 +29,7 @@ export default function App() {
   const [error, setError] = useState("");
   const [selection, setSelection] = useState(() => new Map());
   const [finish, setFinish] = useState("metallic");
-  const [view, setView] = useState("front");
+  const [view, setView] = useState(defaultView);
   const [contact, setContact] = useState(null);
   const abortRef = useRef(null);
 
@@ -45,7 +45,7 @@ export default function App() {
       setPlate(p);
       if (v) { setVehicle(v); setNotFound(false); setFinish(v.color.finish || "metallic"); }
       else { setVehicle(null); setNotFound(true); }
-      setSelection(new Map()); setView("front");
+      setSelection(new Map()); setView(defaultView());
       setStage("vehicle");
     } catch (e) {
       if (e.name !== "AbortError") setError(t.lookupError);

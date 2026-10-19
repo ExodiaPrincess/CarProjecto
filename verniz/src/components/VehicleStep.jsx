@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, BadgeCheck, CalendarDays, Car, Droplet, Fuel, SearchX } from "lucide-react";
+import { ArrowLeft, ArrowRight, BadgeCheck, CalendarDays, Car, Droplet, Fuel, Rotate3d, SearchX } from "lucide-react";
 import { useI18n } from "../i18n.jsx";
 import CarSVG from "../car/CarSVG.jsx";
+import Car3D, { has3D } from "../car/Car3D.jsx";
 import { BODY_TYPE_LIST, PAINT_SWATCHES, tierForMake } from "../data/vehicles.js";
 import { Badge, Button, MiniPlate, ease } from "./ui.jsx";
 import { cx } from "../lib/util.js";
@@ -11,15 +12,29 @@ const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.07, delay
 const item = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.6, ease } } };
 
 function Stage({ vehicle }) {
+  const { t } = useI18n();
+  const three = has3D();
   return (
     <div className="relative overflow-hidden rounded-[22px] border border-white/[.06] bg-[radial-gradient(80%_70%_at_50%_70%,rgba(143,227,240,.10),transparent_70%),linear-gradient(180deg,#0E1318,#07090C)]">
       <div className="floor-grid pointer-events-none absolute inset-x-0 bottom-0 h-1/2 opacity-70 [transform:perspective(500px)_rotateX(60deg)] [transform-origin:bottom]" />
-      <AnimatePresence mode="popLayout" initial={false}>
-        <motion.div key={vehicle.bodyType + vehicle.color.hex} initial={{ opacity: 0, x: 60, filter: "blur(8px)" }} animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-          exit={{ opacity: 0, x: -60, filter: "blur(8px)" }} transition={{ duration: 0.9, ease }} className="relative px-4 pb-2 pt-8 sm:px-10">
-          <CarSVG type={vehicle.bodyType} view="right" color={vehicle.color.hex} sweep className="w-full drop-shadow-[0_24px_30px_rgba(0,0,0,.6)]" title={`${vehicle.make} ${vehicle.model}`} />
+      {three ? (
+        <motion.div initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1, ease }} className="relative aspect-[4/3] w-full sm:aspect-[16/10]">
+          <Car3D type={vehicle.bodyType} color={vehicle.color.hex} label={`${vehicle.make} ${vehicle.model}, 3D`} />
         </motion.div>
-      </AnimatePresence>
+      ) : null}
+      {three ? (
+        <div className="pointer-events-none relative flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 pb-3.5 text-[12px] text-fog-400 sm:absolute sm:inset-x-4 sm:bottom-3 sm:p-0">
+          <span className="flex items-center gap-2"><Rotate3d className="h-4 w-4 text-pearl-400" aria-hidden="true" />{t.drag3d}</span>
+          <span>{t.model3d(t.bodyTypes[vehicle.bodyType])}</span>
+        </div>
+      ) : (
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.div key={vehicle.bodyType + vehicle.color.hex} initial={{ opacity: 0, x: 60, filter: "blur(8px)" }} animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, x: -60, filter: "blur(8px)" }} transition={{ duration: 0.9, ease }} className="relative px-4 pb-2 pt-8 sm:px-10">
+            <CarSVG type={vehicle.bodyType} view="right" color={vehicle.color.hex} sweep className="w-full drop-shadow-[0_24px_30px_rgba(0,0,0,.6)]" title={`${vehicle.make} ${vehicle.model}`} />
+          </motion.div>
+        </AnimatePresence>
+      )}
     </div>
   );
 }

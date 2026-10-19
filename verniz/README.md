@@ -2,7 +2,7 @@
 
 Protótipo de um site premium de orçamentos de pintura e chapa. O cliente escreve a matrícula, confirma a viatura, toca nas peças a reparar num desenho do carro em cinco vistas e recebe uma estimativa imediata. Depois pode pedir um orçamento confirmado, com fotografias dos danos.
 
-Feito com React, Tailwind CSS, Framer Motion e ícones Lucide. O desenho do carro é SVG gerado por código, com cada peça como zona clicável independente.
+Feito com React, Tailwind CSS, Framer Motion, ícones Lucide e three.js. Depois da pesquisa, a viatura aparece num modelo 3D que se pode rodar e onde se tocam as peças; há também cinco vistas desenhadas em SVG, com cada peça como zona clicável independente.
 
 ## Abrir
 
@@ -27,6 +27,14 @@ npm run build      # gera de novo index.html
 | Textos (PT / EN) | `src/i18n.jsx` |
 | Forma dos carros e das peças | `src/car/geometry.js` |
 | Cores e tipos de letra | `tailwind.config.cjs`, `src/styles.css` |
+| Fotografias do topo | `assets/hero/` e `src/data/heroPhotos.js` |
+| Modelo 3D de cada carroçaria | `MODEL_FOR` em `src/car/Car3D.jsx` |
+
+## Fotografias e modelos 3D
+
+- As fotografias do topo são do Unsplash (licença Unsplash, uso comercial permitido): Hyundai Motor Group, Puscas Adryan e Petko Boiadjiev. Duas mostram o logótipo da Hyundai.
+- Os carros 3D são de Quaternius (CC0), os mesmos da raiz do repositório (`assets/models/cars.json`). São formas genéricas por tipo de carroçaria, não o modelo exato. A carrinha usa por agora o SUV.
+- `index.html` carrega as fotografias da pasta `assets/hero/`, por isso as duas têm de estar juntas.
 
 ## Ligar a pesquisa real de matrículas
 
